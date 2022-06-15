@@ -25,8 +25,9 @@ message ListRacesResponse {
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
 
-  // filter for visibility 
-  bool visible = 2;
+  // Filter to return visible only (Note: task only specified being able to retrieve visible = true or getting all
+  // regardless of filter)
+  bool retrieve_visible_only = 2;
 }
 
 /* Resources */
