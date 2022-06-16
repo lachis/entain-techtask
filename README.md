@@ -1,5 +1,7 @@
 ## Entain BE Technical Test
 
+All tasks are completed and are viewable per instructions as Pull requests (labelled from Task1 through Task5). 
+
 Notes from Lachlan:
 1. Would have liked to have had this back to the team @ entain sooner, ran into issues running the protoc commands which I lost a couple hours on for the first day - first PR will have version increments to external modules which was a side effect of me attempting to fix the issues I was having. Running the API and GRPC services all work fine with these version increments
 2. Test files would ideally be in a single folder called Tests
