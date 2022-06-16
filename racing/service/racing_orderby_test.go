@@ -32,7 +32,9 @@ func TestOrderRacesByAdvertisedStartTime(t *testing.T) {
 		if i+1 != len(resp) {
 			next := resp[i+1]
 
-			if next.AdvertisedStartTime.AsTime().Before(race.AdvertisedStartTime.AsTime()) {
+			nextRaceTime := next.GetAdvertisedStartTime().AsTime()
+			currentRaceTime := race.GetAdvertisedStartTime().AsTime()
+			if nextRaceTime.Before(currentRaceTime) {
 				t.Fatalf("Races are not ordered by advertised start time")
 			}
 		}
