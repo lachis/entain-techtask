@@ -128,9 +128,9 @@ func setRaceStatus(race *racing.Race) {
 	raceTime := race.GetAdvertisedStartTime().AsTime()
 	now := time.Now()
 	if raceTime.Before(now) {
-		race.Status = "OPEN"
-	} else {
 		race.Status = "CLOSED"
+	} else {
+		race.Status = "OPEN"
 	}
 
 }
