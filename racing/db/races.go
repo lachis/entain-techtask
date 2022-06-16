@@ -116,9 +116,21 @@ func (m *racesRepo) scanRaces(
 		}
 
 		race.AdvertisedStartTime = ts
+		setRaceStatus(&race)
 
 		races = append(races, &race)
 	}
 
 	return races, nil
+}
+
+func setRaceStatus(race *racing.Race) {
+	raceTime := race.GetAdvertisedStartTime().AsTime()
+	now := time.Now()
+	if raceTime.Before(now) {
+		race.Status = "CLOSED"
+	} else {
+		race.Status = "OPEN"
+	}
+
 }
