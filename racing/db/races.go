@@ -20,7 +20,7 @@ type RacesRepo interface {
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
 
-	// List will return a list of races.
+	// Get wil return a single race
 	Get(id *int64) (*racing.Race, error)
 }
 
@@ -147,7 +147,7 @@ func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 
 	query += " WHERE id=$1"
 
-	row := r.db.QueryRow(query, 1)
+	row := r.db.QueryRow(query, id)
 	var race racing.Race
 	var advertisedStart time.Time
 	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
@@ -169,17 +169,13 @@ func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 	return &race, err
 }
 
-func (r *racesRepo) applyFilterById(query string, id *int64) (string, []interface{}) {
-	var (
-		clauses []string
-		args    []interface{}
-	)
+// func (r *racing.Race) setRaceStatus1(race *racing.Race) {
+// 	raceTime := race.GetAdvertisedStartTime().AsTime()
+// 	now := time.Now()
+// 	if raceTime.Before(now) {
+// 		race.Status = "CLOSED"
+// 	} else {
+// 		race.Status = "OPEN"
+// 	}
 
-	if len(clauses) != 0 {
-		query += " WHERE id=$1"
-	}
-
-	args = append(args, id)
-
-	return query, args
-}
+// }
