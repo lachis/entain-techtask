@@ -156,7 +156,7 @@ func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 
 	row := r.db.QueryRow(query, id)
 
-	// below could be refactored as it is shared code
+	// below could be refactored as it is duplicated code
 	var race racing.Race
 	var advertisedStart time.Time
 	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
