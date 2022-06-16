@@ -19,6 +19,9 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
+
+	// List will return a list of races.
+	Get(id *int64) (*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -133,4 +136,50 @@ func setRaceStatus(race *racing.Race) {
 		race.Status = "OPEN"
 	}
 
+}
+
+func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
+	var (
+		query string
+	)
+
+	query = getRaceQueries()[racesList]
+
+	query += " WHERE id=$1"
+
+	row := r.db.QueryRow(query, 1)
+	var race racing.Race
+	var advertisedStart time.Time
+	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	ts, err := ptypes.TimestampProto(advertisedStart)
+	if err != nil {
+		return nil, err
+	}
+
+	race.AdvertisedStartTime = ts
+	setRaceStatus(&race)
+
+	return &race, err
+}
+
+func (r *racesRepo) applyFilterById(query string, id *int64) (string, []interface{}) {
+	var (
+		clauses []string
+		args    []interface{}
+	)
+
+	if len(clauses) != 0 {
+		query += " WHERE id=$1"
+	}
+
+	args = append(args, id)
+
+	return query, args
 }
