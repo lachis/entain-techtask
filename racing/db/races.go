@@ -127,6 +127,8 @@ func (m *racesRepo) scanRaces(
 	return races, nil
 }
 
+// set a Race Status, abstracted for easier reading - ideally this would be a method
+// on race type, dont feel that it belongs in here hence it is not on the raceRepo type
 func setRaceStatus(race *racing.Race) {
 	raceTime := race.GetAdvertisedStartTime().AsTime()
 	now := time.Now()
@@ -138,6 +140,9 @@ func setRaceStatus(race *racing.Race) {
 
 }
 
+// racesRepo method for Get
+// param: id: int64
+// returns: a race, or specified error
 func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 	var (
 		query string
@@ -145,9 +150,13 @@ func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 
 	query = getRaceQueries()[racesList]
 
+	// filter by id, this would look similiar to applyFilter if we needed to include
+	// additional logic, for now - simply get by the Id
 	query += " WHERE id=$1"
 
 	row := r.db.QueryRow(query, id)
+
+	// below could be refactored as it is shared code
 	var race racing.Race
 	var advertisedStart time.Time
 	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
@@ -168,14 +177,3 @@ func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
 
 	return &race, err
 }
-
-// func (r *racing.Race) setRaceStatus1(race *racing.Race) {
-// 	raceTime := race.GetAdvertisedStartTime().AsTime()
-// 	now := time.Now()
-// 	if raceTime.Before(now) {
-// 		race.Status = "CLOSED"
-// 	} else {
-// 		race.Status = "OPEN"
-// 	}
-
-// }
