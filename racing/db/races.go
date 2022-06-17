@@ -19,6 +19,9 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
+
+	// Get wil return a single race
+	Get(id *int64) (*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -124,6 +127,8 @@ func (m *racesRepo) scanRaces(
 	return races, nil
 }
 
+// set a Race Status, abstracted for easier reading - ideally this would be a method
+// on race type, dont feel that it belongs in here hence it is not on the raceRepo type
 func setRaceStatus(race *racing.Race) {
 	raceTime := race.GetAdvertisedStartTime().AsTime()
 	now := time.Now()
@@ -133,4 +138,42 @@ func setRaceStatus(race *racing.Race) {
 		race.Status = "OPEN"
 	}
 
+}
+
+// racesRepo method for Get
+// param: id: int64
+// returns: a race, or specified error
+func (r *racesRepo) Get(id *int64) (*racing.Race, error) {
+	var (
+		query string
+	)
+
+	query = getRaceQueries()[racesList]
+
+	// filter by id, this would look similiar to applyFilter if we needed to include
+	// additional logic, for now - simply get by the Id
+	query += " WHERE id=$1"
+
+	row := r.db.QueryRow(query, id)
+
+	// below could be refactored as it is duplicated code
+	var race racing.Race
+	var advertisedStart time.Time
+	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	ts, err := ptypes.TimestampProto(advertisedStart)
+	if err != nil {
+		return nil, err
+	}
+
+	race.AdvertisedStartTime = ts
+	setRaceStatus(&race)
+
+	return &race, err
 }
